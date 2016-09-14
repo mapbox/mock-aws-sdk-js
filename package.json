@@ -1,0 +1,43 @@
+{
+  "name": "@mapbox/mock-aws-sdk-js",
+  "version": "0.0.1",
+  "description": "Create stubbed aws-sdk-js clients for testing purposes",
+  "main": "index.js",
+  "engines": {
+    "node": ">4.0.0"
+  },
+  "scripts": {
+    "pretest": "eslint index.js test",
+    "test": "nyc tape test/*.test.js",
+    "coverage": "nyc --reporter html tape test/*.test.js && opener coverage/index.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mapbox/mock-aws-sdk-js.git"
+  },
+  "keywords": [
+    "aws",
+    "mock",
+    "sinon",
+    "testing"
+  ],
+  "author": "Mapbox",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mapbox/mock-aws-sdk-js/issues"
+  },
+  "homepage": "https://github.com/mapbox/mock-aws-sdk-js#readme",
+  "peerDependencies": {
+    "aws-sdk": "^2.5.0"
+  },
+  "dependencies": {
+    "sinon": "^1.17.5",
+    "traverse": "^0.6.6"
+  },
+  "devDependencies": {
+    "eslint": "^3.5.0",
+    "nyc": "^8.1.0",
+    "opener": "^1.4.2",
+    "tape": "^4.6.0"
+  }
+}
