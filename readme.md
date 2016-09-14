@@ -1,5 +1,7 @@
 # @mapbox/mock-aws-sdk-js
 
+[![Build Status](https://travis-ci.org/mapbox/mock-aws-sdk-js.svg?branch=master)](https://travis-ci.org/mapbox/mock-aws-sdk-js)
+
 A library that provides sinon-style stubs for aws-sdk-js service methods for use in testing.
 
 ### Goals
