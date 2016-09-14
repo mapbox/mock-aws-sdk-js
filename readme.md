@@ -36,19 +36,18 @@ test('gets S3 object', function(assert) {
   var data = { Body: new Buffer('hello world') };
   var expected = { Bucket: 'bucket', Key: 'key' };
 
-  var getObject = AWS.stub('S3', 'getObject', function(params, callback) {
+  AWS.stub('S3', 'getObject', function(params, callback) {
+    assert.deepEqual(params, expected, 'called s3.getObject with expected params');
     callback(null, data);
   });
 
-  app(function(err, data) {
+  app.useCallback(function(err, data) {
     assert.ifError(err, 'success');
     assert.equal(data, 'hello world');
 
-    assert.equal(AWS.S3.callCount, 1, 'one s3 client created');
-    assert.ok(AWS.S3.calledWithExactly({ region }), 's3 client created for the correct region');
-
     assert.equal(getObject.callCount, 1, 'called s3.getObject once');
-    assert.ok(getObject.calledWith(expected), 'called s3.getObject with expected params');
+    assert.equal(AWS.S3.callCount, 1, 'one s3 client created');
+    assert.ok(AWS.S3.calledWithExactly({ region: 'eu-west-1' }), 's3 client created for the correct region');
 
     AWS.S3.restore();
     assert.end();
