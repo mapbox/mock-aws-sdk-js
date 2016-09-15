@@ -20,7 +20,7 @@ module.exports.stub = stubMethod;
  */
 function stubMethod(service, method, replacement) {
   if (!isStubbed(service)) stubService(service);
-  if (!replacement) return sinon.stub(getService(service).prototype, method);
+  if (!replacement) return sinon.stub(getService(service).prototype, method).returns(stubRequest());
 
   return sinon.stub(getService(service).prototype, method, function(params, callback) {
     var _this = { request: stubRequest(), response: stubResponse() };
