@@ -46,7 +46,13 @@ function stubService(service) {
   var client = new Original();
 
   function FakeService(config) { Object.assign(this, new Original(config)); }
-  FakeService.prototype = Object.assign({}, client.__proto__);
+  FakeService.prototype = Object.assign(
+    {},
+    client.__proto__.__proto__.__proto__,
+    client.__proto__.__proto__,
+    client.__proto__
+  );
+
 
   var spy = sinon.spy(FakeService);
   spy.restore = function() { setService(service, Original); };
