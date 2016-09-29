@@ -53,7 +53,6 @@ function stubService(service) {
     client.__proto__
   );
 
-
   var spy = sinon.spy(FakeService);
   spy.restore = function() { setService(service, Original); };
 
