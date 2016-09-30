@@ -1,6 +1,6 @@
 var AWS = require('aws-sdk');
 
-module.exports = { useCallback, usePromise, streaming, useEvents, multipleMethods };
+module.exports = { useCallback, usePromise, streaming, useEvents, multipleMethods, upload };
 
 function useCallback(callback) {
   var s3 = new AWS.S3({ region: 'eu-west-1' });
@@ -46,4 +46,12 @@ function multipleMethods(callback) {
     .then(function() { return get; })
     .then(function(data) { callback(null, data.Body.toString()); })
     .catch(callback);
+}
+
+function upload(callback) {
+  var s3 = new AWS.S3({ region: 'eu-west-1' });
+  s3.upload({ Bucket: 'bucket', Key: 'key' }, function(err, data) {
+    if (err) return callback(err);
+    callback(null, data.Body.toString());
+  });
 }

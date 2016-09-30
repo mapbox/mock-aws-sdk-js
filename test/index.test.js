@@ -233,3 +233,23 @@ test('[multipleMethods] replacement function', function(assert) {
     assert.end();
   });
 });
+
+test('[upload] methods inherited multiple times', function(assert) {
+  var upload = AWS.stub('S3', 'upload', function(params, callback) {
+    callback(null, data);
+  });
+
+  app.upload(function(err, data) {
+    assert.ifError(err, 'success');
+    assert.equal(data, 'hello world');
+
+    assert.equal(AWS.S3.callCount, 1, 'one s3 client created');
+    assert.ok(AWS.S3.calledWithExactly({ region }), 's3 client created for the correct region');
+
+    assert.equal(upload.callCount, 1, 'called s3.upload once');
+    assert.ok(upload.calledWith(expected), 'called s3.upload with expected params');
+
+    AWS.S3.restore();
+    assert.end();
+  });
+});
