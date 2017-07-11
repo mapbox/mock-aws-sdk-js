@@ -28,6 +28,37 @@ test('[useCallback] sinon-style', function(assert) {
   });
 });
 
+test('[useCallback] sinon-style onCall', function(assert) {
+  var getObject = AWS.stub('S3', 'getObject');
+  getObject.onCall(0).yields(null, data);
+  getObject.onCall(1).yields(new Error('an error'));
+
+  app.useCallback(function(err, data) {
+    assert.ifError(err, 'success');
+    assert.equal(data, 'hello world');
+
+    assert.equal(AWS.S3.callCount, 1, 'one s3 client created');
+    assert.ok(AWS.S3.calledWithExactly({ region }), 's3 client created for the correct region');
+
+    assert.equal(getObject.callCount, 1, 'called s3.getObject once');
+    assert.ok(getObject.calledWith(expected), 'called s3.getObject with expected params');
+
+    app.useCallback(function(err) {
+      assert.ok(err);
+      assert.equal(err.message, 'an error');
+
+      assert.equal(AWS.S3.callCount, 2, 'second s3 client created');
+      assert.ok(AWS.S3.calledWithExactly({ region }), 's3 client created for the correct region');
+
+      assert.equal(getObject.callCount, 2, 'called s3.getObject once');
+      assert.ok(getObject.calledWith(expected), 'called s3.getObject with expected params');
+
+      AWS.S3.restore();
+      assert.end();
+    });
+  });
+});
+
 test('[useCallback] use replacement function', function(assert) {
   var getObject = AWS.stub('S3', 'getObject', function(params, callback) {
     callback(null, data);
