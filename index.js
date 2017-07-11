@@ -22,7 +22,7 @@ function stubMethod(service, method, replacement) {
   if (!isStubbed(service)) stubService(service);
   if (!replacement) return sinon.stub(getService(service).prototype, method);
 
-  return sinon.stub(getService(service).prototype, method, function(params, callback) {
+  return sinon.stub(getService(service).prototype, method).callsFake(function(params, callback) {
     var _this = { request: stubRequest(), response: stubResponse() };
     replacement.call(_this, params, callback);
     return _this.request;
