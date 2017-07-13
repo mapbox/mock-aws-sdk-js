@@ -28,17 +28,17 @@
   },
   "homepage": "https://github.com/mapbox/mock-aws-sdk-js#readme",
   "peerDependencies": {
-    "aws-sdk": "^2.5.0"
+    "aws-sdk": "^2.84.0"
   },
   "dependencies": {
-    "aws-sdk": "^2.5.0",
-    "sinon": "^1.17.5",
+    "aws-sdk": "^2.84.0",
+    "sinon": "^2.3.8",
     "traverse": "^0.6.6"
   },
   "devDependencies": {
-    "eslint": "^3.5.0",
-    "nyc": "^8.1.0",
-    "opener": "^1.4.2",
-    "tape": "^4.6.0"
+    "eslint": "^4.2.0",
+    "nyc": "^11.0.3",
+    "opener": "^1.4.3",
+    "tape": "^4.7.0"
   }
 }
