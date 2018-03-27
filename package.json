@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "aws-sdk": "^2.84.0",
-    "sinon": "^2.3.8",
+    "sinon": "^5.0.0",
     "traverse": "^0.6.6"
   },
   "devDependencies": {
