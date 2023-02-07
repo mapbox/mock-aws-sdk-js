@@ -1,6 +1,6 @@
 {
   "name": "@mapbox/mock-aws-sdk-js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Create stubbed aws-sdk-js clients for testing purposes",
   "main": "index.js",
   "engines": {
@@ -36,8 +36,8 @@
     "traverse": "^0.6.6"
   },
   "devDependencies": {
-    "eslint": "^4.2.0",
-    "nyc": "^11.0.3",
+    "eslint": "^8.33.0",
+    "nyc": "^15.1.0",
     "opener": "^1.4.3",
     "tape": "^4.7.0"
   }
