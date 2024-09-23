@@ -1,6 +1,6 @@
 {
   "name": "@mapbox/mock-aws-sdk-js",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Create stubbed aws-sdk-js clients for testing purposes",
   "main": "index.js",
   "engines": {
@@ -28,10 +28,10 @@
   },
   "homepage": "https://github.com/mapbox/mock-aws-sdk-js#readme",
   "peerDependencies": {
-    "aws-sdk": "^2.84.0"
+    "aws-sdk": "^2.1691.0"
   },
   "dependencies": {
-    "aws-sdk": "^2.84.0",
+    "aws-sdk": "^2.1691.0",
     "sinon": "^4.4.9",
     "traverse": "^0.6.6"
   },
