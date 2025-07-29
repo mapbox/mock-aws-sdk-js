@@ -1,7 +1,7 @@
 {
   "name": "@mapbox/mock-aws-sdk-js",
-  "version": "1.0.2",
-  "description": "Create stubbed aws-sdk-js clients for testing purposes",
+  "version": "2.0.0",
+  "description": "Create stubbed AWS SDK for JavaScript (v3) clients for testing purposes",
   "main": "index.js",
   "engines": {
     "node": ">4.0.0"
@@ -28,10 +28,20 @@
   },
   "homepage": "https://github.com/mapbox/mock-aws-sdk-js#readme",
   "peerDependencies": {
-    "aws-sdk": "^2.1691.0"
+    "@aws-sdk/client-s3": "^3.0.0",
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/client-lambda": "^3.0.0",
+    "@aws-sdk/client-sqs": "^3.0.0",
+    "@aws-sdk/client-sns": "^3.0.0",
+    "@aws-sdk/client-secrets-manager": "^3.0.0"
   },
   "dependencies": {
-    "aws-sdk": "^2.1691.0",
+    "@aws-sdk/client-s3": "^3.0.0",
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/client-lambda": "^3.0.0",
+    "@aws-sdk/client-sqs": "^3.0.0",
+    "@aws-sdk/client-sns": "^3.0.0",
+    "@aws-sdk/client-secrets-manager": "^3.0.0",
     "sinon": "^4.4.9",
     "traverse": "^0.6.6"
   },

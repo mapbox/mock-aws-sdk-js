@@ -1,74 +1,181 @@
-var events = require('events');
 var sinon = require('sinon');
-var _AWS = require('aws-sdk');
-var traverse = require('traverse');
 
-module.exports = _AWS;
-module.exports.stub = stubMethod;
+// Import AWS SDK v3 clients
+var { S3Client } = require('@aws-sdk/client-s3');
+var { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+var { LambdaClient } = require('@aws-sdk/client-lambda');
+var { SQSClient } = require('@aws-sdk/client-sqs');
+var { SNSClient } = require('@aws-sdk/client-sns');
+var { SecretsManagerClient } = require('@aws-sdk/client-secrets-manager');
+
+var mockClients = {
+  S3Client: createMockClient(S3Client),
+  DynamoDBClient: createMockClient(DynamoDBClient),
+  LambdaClient: createMockClient(LambdaClient),
+  SQSClient: createMockClient(SQSClient),
+  SNSClient: createMockClient(SNSClient),
+  SecretsManagerClient: createMockClient(SecretsManagerClient)
+};
+
+// Create mock commands
+var mockCommands = createMockCommands();
+
+var exports = {
+  // Export mock clients - these will replace the real clients when imported
+  S3Client: mockClients.S3Client,
+  DynamoDBClient: mockClients.DynamoDBClient,
+  LambdaClient: mockClients.LambdaClient,
+  SQSClient: mockClients.SQSClient,
+  SNSClient: mockClients.SNSClient,
+  SecretsManagerClient: mockClients.SecretsManagerClient,
+
+  // Utility functions
+  mockClient: mockClient,
+  mockCommand: mockCommand,
+  restore: restore
+};
+
+// Add mock commands to exports
+Object.assign(exports, mockCommands);
+
+module.exports = exports;
+
+
 
 /**
- * Replaces a single AWS service method with a stub.
- *
- * @param {string} service - the name of the AWS service. Can include `.` for
- * nested services, e.g. `'DynamoDB.DocumentClient'`.
- * @param {string} method - the name of the service method to stub.
- * @param {function} [replacement] - if specified, this function will be called
- * when the service method stub is invoked. `this` in the context of the function
- * will provide a reference to stubbed AWS.Request and AWS.Response objects to
- * simulate more advanced aws-sdk-js usage patterns.
- * @returns {object} stub - [a sinon stub](http://sinonjs.org/docs/#stubs).
+ * Creates a mock client that follows AWS SDK v3 patterns
  */
-function stubMethod(service, method, replacement) {
-  if (!isStubbed(service)) stubService(service);
-  if (!replacement) return sinon.stub(getService(service).prototype, method);
+function createMockClient(ClientClass) {
+  function MockClient(config) {
+    this.config = config || {};
+    this.middlewareStack = {
+      add: sinon.stub(),
+      remove: sinon.stub(),
+      removeByTag: sinon.stub()
+    };
 
-  return sinon.stub(getService(service).prototype, method).callsFake(function(params, callback) {
-    var _this = { request: stubRequest(), response: stubResponse() };
-    replacement.call(_this, params, callback);
-    return _this.request;
+    this.send = sinon.stub().resolves({});
+  }
+
+  // Copy static properties from the original client
+  Object.setPrototypeOf(MockClient, ClientClass);
+  MockClient.prototype = Object.create(ClientClass.prototype);
+  MockClient.prototype.constructor = MockClient;
+
+  return MockClient;
+}
+
+/**
+ * Creates mock commands for AWS SDK v3
+ */
+function createMockCommands() {
+  var commands = {};
+
+  var s3Commands = [
+    'GetObjectCommand', 'PutObjectCommand', 'DeleteObjectCommand',
+    'ListObjectsV2Command', 'HeadObjectCommand', 'CopyObjectCommand'
+  ];
+
+  var dynamoCommands = [
+    'GetItemCommand', 'PutItemCommand', 'DeleteItemCommand',
+    'ScanCommand', 'QueryCommand', 'UpdateItemCommand'
+  ];
+
+  var lambdaCommands = [
+    'InvokeCommand', 'CreateFunctionCommand', 'DeleteFunctionCommand',
+    'ListFunctionsCommand', 'UpdateFunctionCodeCommand'
+  ];
+
+  var sqsCommands = [
+    'SendMessageCommand', 'ReceiveMessageCommand', 'DeleteMessageCommand',
+    'CreateQueueCommand', 'DeleteQueueCommand'
+  ];
+
+  var snsCommands = [
+    'PublishCommand', 'SubscribeCommand', 'CreateTopicCommand',
+    'DeleteTopicCommand', 'ListTopicsCommand'
+  ];
+
+  var secretsManagerCommands = [
+    'GetSecretValueCommand', 'CreateSecretCommand', 'UpdateSecretCommand',
+    'DeleteSecretCommand', 'ListSecretsCommand'
+  ];
+
+  var allCommands = [].concat(s3Commands, dynamoCommands, lambdaCommands, sqsCommands, snsCommands, secretsManagerCommands);
+
+  allCommands.forEach(function(commandName) {
+    commands[commandName] = createMockCommand(commandName);
   });
+
+  return commands;
 }
 
-function isStubbed(service) {
-  return getService(service).isSinonProxy;
+/**
+ * Creates a mock command constructor
+ */
+function createMockCommand(commandName) {
+  function MockCommand(input) {
+    this.input = input || {};
+    this.middlewareStack = {
+      add: sinon.stub(),
+      remove: sinon.stub(),
+      removeByTag: sinon.stub()
+    };
+  }
+
+  MockCommand.prototype.resolveMiddleware = sinon.stub();
+  MockCommand.commandName = commandName;
+
+  return MockCommand;
 }
 
-function getService(name) {
-  return traverse(_AWS).get(name.split('.'));
+/**
+ * Utility function to mock a specific client
+ */
+function mockClient(ClientClass, mockImplementation) {
+  var clientName = ClientClass.name;
+  var mockClientClass = mockClients[clientName];
+
+  if (!mockClientClass) {
+    throw new Error('Unsupported client: ' + clientName);
+  }
+
+  if (mockImplementation) {
+    // Replace the send method with custom implementation
+    mockClientClass.prototype.send = sinon.stub().callsFake(mockImplementation);
+  }
+
+  return mockClientClass;
 }
 
-function setService(name, fn) {
-  traverse(_AWS).set(name.split('.'), fn);
+/**
+ * Utility function to mock a specific command
+ */
+function mockCommand(CommandClass, mockInput) {
+  var commandName = CommandClass.name;
+  var mockCommandClass = mockCommands[commandName];
+
+  if (!mockCommandClass) {
+    throw new Error('Unsupported command: ' + commandName);
+  }
+
+  if (mockInput) {
+    // Create a spy that returns the mock input
+    return sinon.stub().returns(new mockCommandClass(mockInput));
+  }
+
+  return mockCommandClass;
 }
 
-function stubService(service) {
-  var Original = getService(service);
-  var client = new Original();
-
-  function FakeService(config) { Object.assign(this, new Original(config)); }
-  FakeService.prototype = Object.assign(
-    {},
-    client.__proto__.__proto__.__proto__,
-    client.__proto__.__proto__,
-    client.__proto__
-  );
-
-  var spy = sinon.spy(FakeService);
-  spy.restore = function() { setService(service, Original); };
-
-  setService(service, spy);
-}
-
-function stubRequest() {
-  var req = new events.EventEmitter();
-  var stubbed = sinon.createStubInstance(_AWS.Request);
-  for (var method in req.__proto__) delete stubbed[method];
-  return Object.assign(req, stubbed);
-}
-
-function stubResponse() {
-  var req = new events.EventEmitter();
-  var stubbed = sinon.createStubInstance(_AWS.Response);
-  for (var method in req.__proto__) delete stubbed[method];
-  return Object.assign(req, stubbed);
+/**
+ * Restore all mocks
+ */
+function restore() {
+  // Restore all client mocks
+  Object.keys(mockClients).forEach(function(clientName) {
+    var client = mockClients[clientName];
+    if (client.prototype.send && client.prototype.send.restore) {
+      client.prototype.send.restore();
+    }
+  });
 }
